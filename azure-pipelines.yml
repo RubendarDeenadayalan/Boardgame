@@ -1,0 +1,44 @@
+trigger:
+- none
+
+pool:
+  name: rubendar
+  demands:
+    - agent.name -equals Agent-1
+
+stages:
+  - stage: compile
+    displayName: Maven-compile
+    jobs:
+      - job: maven_compile
+        steps:
+          - task: Maven@4
+            inputs:
+              azureSubscription: 'ado-sc'
+              mavenPomFile: 'pom.xml'
+              goals: 'compile'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              javaHomeOption: 'JDKVersion'
+              mavenVersionOption: 'Default'
+              mavenAuthenticateFeed: false
+              effectivePomSkip: false
+              sonarQubeRunAnalysis: false
+  - stage: 
+    displayName: Maven Test
+    jobs:
+      - job: maven_test
+        displayName: "Unit_Tests"
+        steps:
+        - task: Maven@4
+          inputs:
+            azureSubscription: 'ado-sc'
+            mavenPomFile: 'pom.xml'
+            goals: 'test'
+            publishJUnitResults: true
+            testResultsFiles: '**/surefire-reports/TEST-*.xml'
+            javaHomeOption: 'JDKVersion'
+            mavenVersionOption: 'Default'
+            mavenAuthenticateFeed: false
+            effectivePomSkip: false
+            sonarQubeRunAnalysis: false
