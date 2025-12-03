@@ -52,10 +52,10 @@ stages:
             inputs:
               script: 'trivy fs --format table -o fs.html .'
   - stage: 
-    displayName: "Trivy Fs scan"
+    displayName: "SonarQube"
     jobs:
-      - job: trivy_fs_scan
-        displayName: "Trivy Fs Scan"
+      - job: sonar_qube_analysis
+        displayName: "SonarQube Scan"
         steps: 
           - task: SonarQubePrepare@7
             inputs:
