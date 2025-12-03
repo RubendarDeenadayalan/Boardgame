@@ -42,3 +42,30 @@ stages:
             mavenAuthenticateFeed: false
             effectivePomSkip: false
             sonarQubeRunAnalysis: false
+  - stage: 
+    displayName: "Trivy Fs scan"
+    jobs:
+      - job: trivy_fs_scan
+        displayName: "Trivy Fs Scan"
+        steps: 
+          - task: CmdLine@2
+            inputs:
+              script: 'trivy fs --format table -o fs.html .'
+  - stage: 
+    displayName: "Trivy Fs scan"
+    jobs:
+      - job: trivy_fs_scan
+        displayName: "Trivy Fs Scan"
+        steps: 
+          - task: SonarQubePrepare@7
+            inputs:
+              SonarQube: 'sonar-sc'
+              scannerMode: 'cli'
+              configMode: 'manual'
+              cliProjectKey: 'Boardgame'
+              cliProjectName: 'Boardgame'
+              cliSources: '.'
+              extraProperties: 'sonar.java.binaries=.'
+          - task: SonarQubeAnalyze@7
+            inputs:
+              jdkversion: 'JAVA_HOME_17_X64'
