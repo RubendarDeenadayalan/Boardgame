@@ -6,6 +6,12 @@ pool:
   demands:
     - agent.name -equals Agent-1
 
+variables:
+  imageRepository: 'my-app' # The name of your Docker image in ACR
+  dockerRegistryServiceConnection: 'newdocreg' # Your Azure Container Registry service connection name
+  #aksServiceConnection: 'Azure service connection' # Your AKS cluster service connection name
+  #helmChartPath: 'helm/my-app' # Path to Helm chart in repo
+
 stages:
   - stage: compile
     displayName: Maven-compile
@@ -51,21 +57,42 @@ stages:
           - task: CmdLine@2
             inputs:
               script: 'trivy fs --format table -o fs.html .'
-  - stage: 
-    displayName: "SonarQube"
+  # - stage: 
+  #   displayName: "SonarQube"
+  #   jobs:
+  #     - job: sonar_qube_analysis
+  #       displayName: "SonarQube Scan"
+  #       steps: 
+  #         - task: SonarQubePrepare@7
+  #           inputs:
+  #             SonarQube: 'sonar-sc'
+  #             scannerMode: 'cli'
+  #             configMode: 'manual'
+  #             cliProjectKey: 'Boardgame'
+  #             cliProjectName: 'Boardgame'
+  #             cliSources: '.'
+  #             extraProperties: 'sonar.java.binaries=.'
+  #         - task: SonarQubeAnalyze@7
+  #           inputs:
+  #             jdkversion: 'JAVA_HOME_17_X64'
+  - stage: Build
+    displayName: Build and Push Docker Image
     jobs:
-      - job: sonar_qube_analysis
-        displayName: "SonarQube Scan"
-        steps: 
-          - task: SonarQubePrepare@7
-            inputs:
-              SonarQube: 'sonar-sc'
-              scannerMode: 'cli'
-              configMode: 'manual'
-              cliProjectKey: 'Boardgame'
-              cliProjectName: 'Boardgame'
-              cliSources: '.'
-              extraProperties: 'sonar.java.binaries=.'
-          - task: SonarQubeAnalyze@7
-            inputs:
-              jdkversion: 'JAVA_HOME_17_X64'
+    - job: BuildJob
+      displayName: Build Container
+      steps:
+      - task: Docker@2
+        displayName: Build and Push Docker Image
+        inputs:
+          containerRegistry: '$(dockerRegistryServiceConnection)'
+          repository: '$(imageRepository)'
+          command: 'buildAndPush'
+          Dockerfile: 'app/Dockerfile'
+          tags: |
+            $(Build.BuildId)
+            latest
+
+      - task: HelmInstaller@1
+        displayName: Install Helm
+        inputs:
+          helmVersionToInstall: '3.11.0'
