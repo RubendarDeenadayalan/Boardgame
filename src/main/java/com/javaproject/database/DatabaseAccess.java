@@ -16,8 +16,6 @@ import org.springframework.stereotype.Repository;
 import com.javaproject.beans.BoardGame;
 import com.javaproject.beans.Review;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 @Repository
 // @AllArgsConstructor
